@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     
-    <title>Tag: React Native | Hexo</title>
+    <title>Archives: 2020/9 | Hexo</title>
     <meta name="description" content="A minimal hexo theme."/>
     <meta name="keywords" content="hexo,theme,otakism,otaku"/>
     <meta name="HandheldFriendly" content="True"/>
@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta property="og:type" content="website">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/tags/React-Native/index.html">
+<meta property="og:url" content="http://yoursite.com/archives/2020/09/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="Theresa">
@@ -70,11 +70,12 @@
 
     <main id="main" role="main">
         
-  <section class="page-header tag">
-    <h1>- <span>React Native</span> -</h1>
+    
+
+
+  <section class="page-header archive">
+    <h1>- <span>2020.9</span> -</h1>
   </section>
-
-
 
 
 
@@ -161,74 +162,8 @@
     </section>
 </article>
   
-    <article class="post ">
-
-    
-        <h2 class="title">
-            <a href="/2020/08/23/2020/reactNativeRouter/">
-                React Native 简易路由
-            </a>
-        </h2>
-    
-    <time>
-        Aug 23, 2020
-    </time>
-    <section class="content">
-        <img src="/images/2020/reactNativeRouter/cover.jpg">
-
-<p>React Native有两大路由框架，react-navigation和react-native-navigation<br>第三方的路由使用起来并没有什么大问题，但对于原生和 RN 页面混合开发的项目来说，并不太友好<br>因此面对高度复杂的场景，自定义一个的路由会是更好的选择</p>
-<p>以iOS为例，定制一个简易的原生路由</p>
-<p>将拥有以下功能:<br>push、pop、popToRoot、present、dismiss、switchTab</p>
-<p>同时兼容原生以及RN页面之间的切换</p>
-<h3><span id="react-native部分">React Native部分</span></h3><p>导航的桥接方法</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">Navigatior</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> push = <span class="function">(<span class="params">component, options</span>) =&gt;</span> &#123;</span><br><span class="line">    NavigationBridge.push(component, options)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> pop = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    NavigationBridge.pop()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> popToRoot = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    NavigationBridge.popToRoot()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> present = <span class="function">(<span class="params">component, options</span>) =&gt;</span> &#123;</span><br><span class="line">    NavigationBridge.present(component, options)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> dismiss = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    NavigationBridge.dismiss()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> switchTab = <span class="function">(<span class="params">index</span>) =&gt;</span> &#123;</span><br><span class="line">    NavigationBridge.switchTab(index)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>由于路由在原生端控制，因此项目中的所有页面都需要单独注册，且注册的同时需要将每个页面的样式配置记录下来</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> registerComponent = <span class="function">(<span class="params">appKey, component</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> options = component.navigationItem || &#123;&#125;</span><br><span class="line">  NavigationBridge.registerReactComponent(appKey, options)</span><br><span class="line">  AppRegistry.registerComponent(appKey, <span class="function">() =&gt;</span> component)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">registerComponent(<span class="string">&#x27;Home&#x27;</span>, Home)</span><br><span class="line">registerComponent(<span class="string">&#x27;Setting&#x27;</span>, Setting)</span><br><span class="line">registerComponent(<span class="string">&#x27;Detail&#x27;</span>, Detail)</span><br><span class="line">registerComponent(<span class="string">&#x27;Present&#x27;</span>, Present)</span><br></pre></td></tr></table></figure>
-
-<p>React Native各页面中的样式在navigationItem中设定，如导航栏标题、是否隐藏导航栏等</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Detail.navigationItem = &#123;</span><br><span class="line">  title: <span class="string">&#x27;Detail&#x27;</span>,</span><br><span class="line">  hideNavigationBar: <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>注册完毕后调用setRoot设置根页面，这里设定为2个TabBar， 各自拥有独立的Navigation</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">NavigationBridge.setRoot(&#123;</span><br><span class="line">  root: &#123;</span><br><span class="line">    tabs: &#123;</span><br><span class="line">      children: [</span><br><span class="line">        &#123;</span><br><span class="line">          component: <span class="string">&#x27;Home&#x27;</span>,</span><br><span class="line">          title: <span class="string">&#x27;主页&#x27;</span>,</span><br><span class="line">          icon: Image.resolveAssetSource(<span class="built_in">require</span>(<span class="string">&#x27;./src/image/Home.png&#x27;</span>))</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          component: <span class="string">&#x27;Setting&#x27;</span>,</span><br><span class="line">          title: <span class="string">&#x27;设置&#x27;</span>,</span><br><span class="line">          icon: Image.resolveAssetSource(<span class="built_in">require</span>(<span class="string">&#x27;./src/image/Profile.png&#x27;</span>))</span><br><span class="line">        &#125;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<h3><span id="原生部分">原生部分</span></h3><p>主要有以下4个类</p>
-<ul>
-<li>ALCNativeViewController</li>
-<li>ALCReactViewController</li>
-<li>ALCNavigationBridge</li>
-<li>ALCNavigationManager</li>
-</ul>
-<p>ALCNativeViewController和ALCReactViewController继承UIViewController，用于创建原生、RN的页面。</p>
-<p>ALCNavigationBridge实现具体桥接的方法，即registerReactComponent、setRoot、push、pop等。</p>
-<p>ALCNavigationManager管理路由，这里包含两个字典，分别记录原生、RN的页面，同时提供注册、查找页面的方法。</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ALCNavigationManager</span> : <span class="title">NSObject</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) RCTBridge *bridge;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, <span class="keyword">readonly</span>) <span class="built_in">NSMutableDictionary</span> *nativeModules;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, <span class="keyword">readonly</span>) <span class="built_in">NSMutableDictionary</span> *reactModules;</span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">instancetype</span>)shared;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)registerNativeModule:(<span class="built_in">NSString</span> *)moduleName forController:(Class)clazz;</span><br><span class="line">- (<span class="built_in">BOOL</span>)hasNativeModule:(<span class="built_in">NSString</span> *)moduleName;</span><br><span class="line">- (Class)nativeModuleClassFromName:(<span class="built_in">NSString</span> *)moduleName;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)registerReactModule:(<span class="built_in">NSString</span> *)moduleName options:(<span class="built_in">NSDictionary</span> *)options;</span><br><span class="line">- (<span class="built_in">BOOL</span>)hasReactModuleForName:(<span class="built_in">NSString</span> *)moduleName;</span><br><span class="line">- (<span class="built_in">NSDictionary</span> *)reactModuleOptionsForKey:(<span class="built_in">NSString</span> *)moduleName;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">UIViewController</span> *)fetchViewController:(<span class="built_in">NSString</span> *)pageName params:(<span class="built_in">NSDictionary</span> *)params;</span><br><span class="line">- (<span class="built_in">UIImage</span> *)fetchImage:(<span class="built_in">NSDictionary</span> *)json;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
-
-<p>在路由跳转时，会查找该页面是否注册过，根据该页面是RN还是原生来创建对应的控制器</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">UIViewController</span> *)fetchViewController:(<span class="built_in">NSString</span> *)pageName params:(<span class="built_in">NSDictionary</span> * __<span class="keyword">nullable</span>)params &#123;</span><br><span class="line">    <span class="built_in">BOOL</span> hasNativeVC = [<span class="keyword">self</span> hasNativeModule:pageName];</span><br><span class="line">    <span class="built_in">UIViewController</span> *vc;</span><br><span class="line">    <span class="keyword">if</span> (hasNativeVC) &#123;</span><br><span class="line">        Class clazz = [<span class="keyword">self</span> nativeModuleClassFromName:pageName];</span><br><span class="line">        vc = [[clazz alloc] initWithModuleName:pageName props:params];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">NSDictionary</span> *options = [<span class="keyword">self</span> reactModuleOptionsForKey:pageName];</span><br><span class="line">        RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:<span class="keyword">self</span>.bridge moduleName:pageName initialProperties:params];</span><br><span class="line">        vc = [[ALCReactViewController alloc] initWithModuleName:pageName options:options];</span><br><span class="line">        vc.view = rootView;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> vc;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="使用">使用</span></h3><p>如果有原生页面，启动时需要在AppDelegate里注册，该原生页面需要继承ALCNativeViewController，路由将自动支持原生页面的导航，这里注册了一个名为NativeViewController的原生页面</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[ALCNavigationManager shared].bridge = [[RCTBridge alloc] initWithDelegate:<span class="keyword">self</span> launchOptions:launchOptions];</span><br><span class="line">[[ALCNavigationManager shared] registerNativeModule:<span class="string">@&quot;NativeViewController&quot;</span> forController:[ThisIsViewController <span class="keyword">class</span>]];</span><br></pre></td></tr></table></figure>
-
-<p>和跳转RN页面一样，跳转原生时只需要传入原生页面的注册名字</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;Button</span><br><span class="line">  title=<span class="string">&quot;push native&quot;</span></span><br><span class="line">  onPress=&#123;<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    Navigatior.push(<span class="string">&#x27;NativeViewController&#x27;</span>)</span><br><span class="line">  &#125;&#125;</span><br><span class="line">/&gt;</span><br></pre></td></tr></table></figure>
-
-<p>同样的，原生跳转RN，根据RN页面注册的名称来创建即可</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)goToDetail &#123;</span><br><span class="line">    <span class="built_in">UIViewController</span> *vc = [[ALCNavigationManager shared] fetchViewController:<span class="string">@&quot;Detail&quot;</span> params:<span class="literal">nil</span>];</span><br><span class="line">    [<span class="keyword">self</span>.navigationController pushViewController:vc animated:<span class="literal">YES</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-        
-
-        
-            <div class="tags">
-                <a class="tag-none-link" href="/tags/React-Native/" rel="tag">React Native</a>
-            </div>
-        
-
-    </section>
-</article>
-  
 </section>
+
 
 
         <script>setLoadingBarProgress(60);</script>
