@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    
+    <title>Archives: 2020/11 | 断舍离</title>
+    <meta name="description" content="A minimal hexo theme."/>
+    <meta name="keywords" content="hexo,theme,otakism,otaku"/>
+    <meta name="HandheldFriendly" content="True"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="google-site-verification" content=""/>
+    <meta name="baidu-site-verification" content=""/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta property="og:type" content="website">
+<meta property="og:title" content="断舍离">
+<meta property="og:url" content="http://yoursite.com/archives/2020/11/index.html">
+<meta property="og:site_name" content="断舍离">
+<meta property="og:locale" content="en_US">
+<meta property="article:author" content="Theresa">
+<meta name="twitter:card" content="summary">
+    
+
+    <!-- Favicon -->
+    
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata|Roboto:300,400,700" rel="stylesheet">
+
+    
+<link rel="stylesheet" href="/style.css">
+
+    <script>
+      function setLoadingBarProgress(num) {
+        document.getElementById('loading-bar').style.width = num + "%";
+      }
+    </script>
+
+    
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.1.0"></head>
+
+<body>
+
+<div id="loading-bar-wrapper">
+  <div id="loading-bar"></div>
+</div>
+
+<script>setLoadingBarProgress(20)</script>
+
+<div id="site-wrapper">
+
+    <header id="header">
+    <div id="header-wrapper" class="clearfix">
+        <a id="logo" href="/">
+            <img src="/img/logo.png"/>
+            <span id="site-desc">
+                断舍离
+            </span>
+        </a>
+        <button id="site-nav-switch">
+            <span class="icon icon-menu"></span>
+        </button>
+    </div>
+</header>
+    <script>setLoadingBarProgress(40);</script>
+
+    <main id="main" role="main">
+        
+    
+
+
+  <section class="page-header archive">
+    <h1>- <span>2020.11</span> -</h1>
+  </section>
+
+
+
+
+<section class="post-list">
+  
+    <article class="post ">
+
+    
+        <h2 class="title">
+            <a href="/2020/11/21/2020/softwareDecode/">
+                软解码，末日已到
+            </a>
+        </h2>
+    
+    <time>
+        Nov 21, 2020
+    </time>
+    <section class="content">
+        <p>前阵子播放一个视频时发现是这样子的</p>
+<img src="/images/2021/softwareDecode/error_decode.png">
+
+<p>在电脑播放器里播放，是正常的</p>
+<img src="/images/2021/softwareDecode/normal_decode.png">
+
+<p>电脑采用硬解码模式播放，手机播放器采用FFmpeg软解码（CPU），将其切换至硬解码（SoC内置模块），播放正常。<br>在软解码模式下播放别的视频，播放正常<br>仔细对比两个视频发现，播放异常的视频是采用10bit压制的</p>
+<p>问题找到了</p>
+<p>该视频主要参数为1080p yuv420 10bit，FFmpeg解码后的帧以AVFrame的形式存在，其中data数组中的头三位分别存放着yuv数据，另外可以看到10bit视频linesize为分辨率宽度的2倍</p>
+<img src="/images/2021/softwareDecode/frame_info.jpg">
+
+<p>播放器使用了Metal作为渲染层，其读取的纹理格式为MTLPixelFormatR8Unorm，即每个像素占用1个Byte，R8代表单像素8bit，U为unsigned，norm为归一化，即用[0.0, 1.0]代表着0-255色阶</p>
+<p>这个10bit视频软解码后的帧格式为AV_PIX_FMT_YUV420P10LE，每个像素占用2个Byte，直接从2个Byte的数据读取一个Byte来渲染当然会有问题</p>
+<p>使用硬解码时，获得的帧已经经过转换，格式为AV_PIX_FMT_NV12，每个像素占用1个Byte，虽然使用的shader不同，但渲染层能够直接渲染成功</p>
+<p>渲染层不想改动，想要正常播放只能改动数据源，以下代码实现了10bit转8bit</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">for (int i &#x3D; 0; i &lt; 8; i++) &#123;</span><br><span class="line">    int width &#x3D; frame-&gt;linesize[i];</span><br><span class="line">    int height &#x3D; frame-&gt;height;</span><br><span class="line">    uint8_t *src &#x3D; frame-&gt;data[i];</span><br><span class="line">    uint8_t *dst &#x3D; frame-&gt;data[i];</span><br><span class="line">    uint8_t *p &#x3D; frame-&gt;data[i];</span><br><span class="line"></span><br><span class="line">    for (int h &#x3D; 0; h &lt; height; h++) &#123;</span><br><span class="line">        for (int w &#x3D; 0; w &lt; width; w+&#x3D;2) &#123;</span><br><span class="line">            uint16_t value &#x3D; *(uint16_t *)p;</span><br><span class="line">            memset(dst, value&gt;&gt;2, 1);</span><br><span class="line">            dst +&#x3D; 1;</span><br><span class="line">            p +&#x3D; 2;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    self-&gt;_data[i] &#x3D; src;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但这带来了新的问题，软解码本身消耗大量CPU算力，解码后还要对其图像进行二次处理，进一步加大CPU的压力，对于高分辨率或者高帧数的视频来说将无法正常播放</p>
+<p>直接改动数据源是不明智的选择，于是着手渲染层，将读取的纹理格式变为MTLPixelFormatR16Unorm，即每像素2byte，同时纹理的bytesPerRow设定为原来像素的2倍</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">size_t width = frame.width;</span><br><span class="line">size_t height = frame.height;</span><br><span class="line"><span class="built_in">MTLRegion</span> yRegion = &#123; &#123; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span> &#125;, &#123; width, height, <span class="number">1</span> &#125; &#125;;</span><br><span class="line"><span class="built_in">MTLRegion</span> uvRegion = &#123; &#123; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span> &#125;, &#123; width / <span class="number">2</span>, height / <span class="number">2</span>, <span class="number">1</span> &#125; &#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">MTLTextureDescriptor</span> *yDesc = [<span class="built_in">MTLTextureDescriptor</span> texture2DDescriptorWithPixelFormat:<span class="built_in">MTLPixelFormatR16Unorm</span></span><br><span class="line">                                                                                  width:width</span><br><span class="line">                                                                                height:height</span><br><span class="line">                                                                              mipmapped:<span class="literal">YES</span>];</span><br><span class="line"><span class="built_in">MTLTextureDescriptor</span> *uvDesc = [<span class="built_in">MTLTextureDescriptor</span> texture2DDescriptorWithPixelFormat:<span class="built_in">MTLPixelFormatR16Unorm</span></span><br><span class="line">                                                                                  width:width / <span class="number">2</span></span><br><span class="line">                                                                                  height:height / <span class="number">2</span></span><br><span class="line">                                                                              mipmapped:<span class="literal">YES</span>];</span><br><span class="line"><span class="keyword">id</span>&lt;<span class="built_in">MTLTexture</span>&gt; yTexture = [<span class="keyword">self</span>.device newTextureWithDescriptor:yDesc];</span><br><span class="line"><span class="keyword">id</span>&lt;<span class="built_in">MTLTexture</span>&gt; uTexture = [<span class="keyword">self</span>.device newTextureWithDescriptor:uvDesc];</span><br><span class="line"><span class="keyword">id</span>&lt;<span class="built_in">MTLTexture</span>&gt; vTexture = [<span class="keyword">self</span>.device newTextureWithDescriptor:uvDesc];</span><br><span class="line">[yTexture replaceRegion:yRegion mipmapLevel:<span class="number">0</span> withBytes:frame.data[<span class="number">0</span>] bytesPerRow:width * <span class="number">2</span>];</span><br><span class="line">[uTexture replaceRegion:uvRegion mipmapLevel:<span class="number">0</span> withBytes:frame.data[<span class="number">1</span>] bytesPerRow:width];</span><br><span class="line">[vTexture replaceRegion:uvRegion mipmapLevel:<span class="number">0</span> withBytes:frame.data[<span class="number">2</span>] bytesPerRow:width];</span><br></pre></td></tr></table></figure>
+
+<p>fragment shader也需要做相对应的改动，10bit转成16bit，读取的yuv数据分别乘上一个比例系数 2^16/2^10（即65535/1024）</p>
+<p>这里色深没有像转8bit那样有所损失，画质完美无损</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">half coe = <span class="number">65535.0</span> / <span class="number">1024.0</span>;</span><br><span class="line">half y, u, v;</span><br><span class="line"></span><br><span class="line">y = half4(ytexture.sample(s, mappingVertex.textureCoordinate)).r * coe;</span><br><span class="line">u = half4(utexture.sample(s, mappingVertex.textureCoordinate)).r * coe - <span class="number">0.5</span>;</span><br><span class="line">v = half4(vtexture.sample(s, mappingVertex.textureCoordinate)).r * coe - <span class="number">0.5</span>;</span><br></pre></td></tr></table></figure>
+
+<p>重新运行，现在能够正常播放了</p>
+<p>2020年的今天，新上市的手机都能够支持H264、H265视频的硬解，且速度快、性能高，非常省电，已经是播放视频的首要选择，软解码充其量作为后备方案，但遗憾的是，这一后备的选择可能永远都用不上了</p>
+
+
+        
+
+        
+            <div class="tags">
+                <a class="tag-none-link" href="/tags/FFmpeg/" rel="tag">FFmpeg</a><a class="tag-none-link" href="/tags/Metal/" rel="tag">Metal</a><a class="tag-none-link" href="/tags/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">图像处理</a><a class="tag-none-link" href="/tags/%E9%9F%B3%E8%A7%86%E9%A2%91/" rel="tag">音视频</a>
+            </div>
+        
+
+    </section>
+</article>
+  
+</section>
+
+
+
+        <script>setLoadingBarProgress(60);</script>
+    </main>
+
+    <footer id="footer" class="clearfix">
+
+    
+
+    <div class="social-wrapper">
+        
+            
+                <a href="https://github.com/artchen" class="social github"
+                   target="_blank" rel="external">
+                    <span class="icon icon-github"></span>
+                </a>
+            
+                <a href="/atom.xml" class="social rss"
+                   target="_blank" rel="external">
+                    <span class="icon icon-rss"></span>
+                </a>
+            
+        
+    </div>
+
+    <div class="theme-by">Theme <span class="codename">Memory</span> designed by <a href="https://artifact.me/"
+                                                                                    target="_blank">Art Chen</a>.
+    </div>
+    <div>&copy; <a href="/">断舍离</a></div>
+
+</footer>
+
+
+    <script>setLoadingBarProgress(80);</script>
+    <div class="overlay"></div>
+</div>
+
+<div class="site-sidebar" id="site-sidebar">
+
+    
+
+    <div class="sidebar-switch clearfix "
+         style="display: none">
+        <a class="dark-btn active" data-toggle="toc">
+            <span class="icon icon-list"></span>
+            <span class="text">Index</span>
+        </a>
+        <a class="dark-btn" data-toggle="bio">
+            <span class="icon icon-person"></span>
+            <span class="text">Bio</span>
+        </a>
+    </div>
+
+    <div class="site-toc "
+         style="display: none">
+        
+            <div class="no-index">No Index</div>
+        
+    </div>
+
+    <div class="site-bio show"
+         style="display: block">
+
+        <div class="about-me clearfix">
+            <div class="avatar">
+                <img src="/img/avatar.jpg"/>
+            </div>
+            <div class="info">
+                <a class="name dark-btn" href="/about">
+                    Theresa
+                </a>
+            </div>
+            <div class="info">
+                <span class="item desc">
+                    
+                </span>
+            </div>
+        </div>
+
+        <div class="menu section">
+            <ul class="clearfix">
+                
+                    <li class="left">
+                        <a href="/about"
+                           onfocus="this.blur();"
+                           class="nav-about dark-btn block">
+                            About
+                        </a>
+                    </li>
+                
+                    <li class="right">
+                        <a href="/archives"
+                           onfocus="this.blur();"
+                           class="nav-archives dark-btn block">
+                            Archives
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="shortcuts">
+        <a href="#header" class="top window-nav dark-btn" id="go-top">
+            <span class="icon icon-chevron-thin-up"></span>
+        </a>
+        <a class="close dark-btn" id="sidebar-close">
+            <span class="icon icon-close"></span>
+        </a>
+        <a href="#footer" class="top window-nav dark-btn" id="go-bottom">
+            <span class="icon icon-chevron-thin-down"></span>
+        </a>
+    </div>
+
+</div>
+
+
+
+
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script>window.jQuery || document.write('<script src="/js/jquery.min.js"><\/script>')</script>
+
+
+<script src="/js/jquery.fitvids.js"></script>
+
+<script>
+  var GOOGLE_CUSTOM_SEARCH_API_KEY = "";
+  var GOOGLE_CUSTOM_SEARCH_ENGINE_ID = "";
+  var ALGOLIA_API_KEY = "";
+  var ALGOLIA_APP_ID = "";
+  var ALGOLIA_INDEX_NAME = "";
+  var AZURE_SERVICE_NAME = "";
+  var AZURE_INDEX_NAME = "";
+  var AZURE_QUERY_KEY = "";
+  var SEARCH_SERVICE = "";
+  var universalSearchConfig = {};
+  if (SEARCH_SERVICE === 'google') {
+    universalSearchConfig = {
+      searchService: SEARCH_SERVICE,
+      apiKey: GOOGLE_CUSTOM_SEARCH_API_KEY,
+      engineId: GOOGLE_CUSTOM_SEARCH_ENGINE_ID,
+      imagePath: "/img/"
+    };
+  } else if (SEARCH_SERVICE === 'algolia') {
+    universalSearchConfig = {
+      searchService: SEARCH_SERVICE,
+      apiKey: ALGOLIA_API_KEY,
+      appId: ALGOLIA_APP_ID,
+      indexName: ALGOLIA_INDEX_NAME,
+      imagePath: "/img/"
+    };
+  } else if (SEARCH_SERVICE === 'azure') {
+    universalSearchConfig = {
+      searchService: SEARCH_SERVICE,
+      serviceName: AZURE_SERVICE_NAME,
+      indexName: AZURE_INDEX_NAME,
+      apiKey: AZURE_QUERY_KEY,
+      imagePath: "/img/"
+    };
+  }
+</script>
+
+<script src="/js/app.js"></script>
+
+
+<script src="/js/search.js"></script>
+
+
+
+
+
+<script>setLoadingBarProgress(100);</script>
+
+</body>
+</html>
