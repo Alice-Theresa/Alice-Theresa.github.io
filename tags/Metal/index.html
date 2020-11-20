@@ -100,7 +100,12 @@
 <p>在电脑播放器里播放，是正常的</p>
 <img src="/images/2021/softwareDecode/normal_decode.png">
 
-<p>电脑采用硬解码模式播放，手机播放器采用FFmpeg软解码（CPU），将其切换至硬解码（SoC内置模块），播放正常。<br>在软解码模式下播放别的视频，播放正常<br>仔细对比两个视频发现，播放异常的视频是采用10bit压制的</p>
+<p></p>
+<center>
+    <font color="gray">《终将成为你》第5话</font>
+</center>
+
+<p>电脑采用硬解码模式播放，手机播放器采用FFmpeg软解码，将其切换至硬解码，播放正常。<br>在软解码模式下播放别的视频，播放正常<br>仔细对比两个视频发现，播放异常的视频是采用10bit压制的</p>
 <p>问题找到了</p>
 <p>该视频主要参数为1080p yuv420 10bit，FFmpeg解码后的帧以AVFrame的形式存在，其中data数组中的头三位分别存放着yuv数据，另外可以看到10bit视频linesize为分辨率宽度的2倍</p>
 <img src="/images/2021/softwareDecode/frame_info.jpg">
