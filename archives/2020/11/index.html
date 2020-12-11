@@ -96,10 +96,10 @@
     </time>
     <section class="content">
         <p>前阵子播放一个视频时发现是这样子的</p>
-<img src="/images/2021/softwareDecode/error_decode.png">
+<img src="/images/2020/softwareDecode/error_decode.png">
 
 <p>在电脑播放器里播放，是正常的</p>
-<img src="/images/2021/softwareDecode/normal_decode.png">
+<img src="/images/2020/softwareDecode/normal_decode.png">
 
 <p></p>
 <center>
@@ -109,7 +109,7 @@
 <p>电脑采用硬解码模式播放，手机播放器采用FFmpeg软解码，将其切换至硬解码，播放正常。<br>在软解码模式下播放别的视频，播放正常<br>仔细对比两个视频发现，播放异常的视频是采用10bit压制的</p>
 <p>问题找到了</p>
 <p>该视频主要参数为1080p yuv420 10bit，FFmpeg解码后的帧以AVFrame的形式存在，其中data数组中的头三位分别存放着yuv数据，另外可以看到10bit视频linesize为分辨率宽度的2倍</p>
-<img src="/images/2021/softwareDecode/frame_info.jpg">
+<img src="/images/2020/softwareDecode/frame_info.jpg">
 
 <p>播放器使用了Metal作为渲染层，其读取的纹理格式为MTLPixelFormatR8Unorm，即每个像素占用1个Byte，R8代表单像素8bit，U为unsigned，norm为归一化，即用[0.0, 1.0]代表着0-255色阶</p>
 <p>这个10bit视频软解码后的帧格式为AV_PIX_FMT_YUV420P10LE，每个像素占用2个Byte，直接从2个Byte的数据读取一个Byte来渲染当然会有问题</p>
