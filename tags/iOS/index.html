@@ -100,6 +100,7 @@
 <p>Publisher主要有两种，一种是如Just、Future等一次性的“发布”，另外一种是Subject类型，源源不断的往外“发布”<br>Subscriber就是用来订阅Publisher的“发布”<br>而Operator介于两者之间，对“发布”的“内容”进行一系列的操作</p>
 <h3><span id="盒子">盒子</span></h3><p>为了更好的理解，我们打个比喻，Publisher其实就是一个“盒子”<br>有Just类型、Future类型等，里面可以装东西，如数字“1”</p>
 <p>Just(1)，这就是一个类型为Just的盒子装着数字1，我们对其订阅，则会进行“拆盒子”的动作，拿到盒子里面的东西</p>
+<p><strong>以下代码均忽略sink返回的Cancellable</strong></p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Just</span>(<span class="number">1</span>).sink &#123; value <span class="keyword">in</span></span><br><span class="line">    <span class="built_in">print</span>(value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这里会打印数字1</p>
 <h3><span id="map-amp-flatmap">map &amp; flatMap</span></h3><p>函数式编程里面用得最多的估计就是 map 和 flatMap<br>它们都属于Operator，均可对盒子内部的东西进行改动</p>
@@ -118,6 +119,8 @@
 <p>也就是说，经过这样子的 map 操作后，字母A外面会套了两层“盒子”，订阅的时候拆掉最外一层，最后得到一个里面的“盒子”</p>
 <p>这里可以联想一下，我们所说的函数式编程，是有点数学的味道，就拿map 对比 flatMap 来说，map 其实是一个“升阶“函数</p>
 <h3><span id="switchtolatest">switchToLatest</span></h3><p>既然有“升阶“，就有”降阶“, switchToLatest 会额外帮你拆掉最外面的“盒子”</p>
+<img src="/images/2021/SwitftCombine/example.jpg">
+
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Just</span>(<span class="number">1</span>)</span><br><span class="line">    .<span class="built_in">map</span> &#123; <span class="number">_</span> <span class="keyword">in</span></span><br><span class="line">        <span class="type">Just</span>(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    .switchToLatest()</span><br><span class="line">    .sink &#123; value <span class="keyword">in</span></span><br><span class="line">        <span class="built_in">print</span>(value)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
 <p>这样我们就能得到想要的结果了，打印出字母A</p>
