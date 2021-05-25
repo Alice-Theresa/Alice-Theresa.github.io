@@ -21,7 +21,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://yoursite.com/images/2021/SwitftCombine/example.jpg">
 <meta property="article:published_time" content="2021-03-25T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-03-18T10:32:34.541Z">
+<meta property="article:modified_time" content="2021-03-29T05:04:48.531Z">
 <meta property="article:author" content="Theresa">
 <meta property="article:tag" content="iOS">
 <meta name="twitter:card" content="summary">
@@ -89,11 +89,11 @@
     </time>
     <section class="content">
         <div class="article-entry" itemprop="articleBody">
-            <h3><span id="combine">Combine</span></h3><p>2019年，苹果推出了新一代UI框架SwiftUI，一并出场的还有Combine这个函数式编程库，在此之前，想在iOS平台上使用函数式编程有两个库，分别是RAC以及RxSwift。</p>
+            <h2><span id="combine">Combine</span></h2><p>2019年，苹果推出了新一代UI框架SwiftUI，一并出场的还有Combine这个函数式编程库，在此之前，想在iOS平台上使用函数式编程有两个库，分别是RAC以及RxSwift。</p>
 <p>Combine作为官方推出的产品，必然是走第三方库的路，让第三方库无路可走，所以项目没有历史负担的话，应优先使用官方库</p>
 <p>Combine有三大核心，Publisher、Operator以及Subscriber，其实跟别的函数式编程库没什么大区别，毕竟思想都是一致的</p>
 <p>Publisher主要有两种，一种是如Just、Future等一次性的“发布”，另外一种是Subject类型，源源不断的往外“发布”<br>Subscriber就是用来订阅Publisher的“发布”<br>而Operator介于两者之间，对“发布”的“内容”进行一系列的操作</p>
-<h3><span id="盒子">盒子</span></h3><p>为了更好的理解，我们打个比喻，Publisher其实就是一个“盒子”<br>有Just类型、Future类型等，里面可以装东西，如数字“1”</p>
+<h2><span id="盒子">盒子</span></h2><p>为了更好的理解，我们打个比喻，Publisher其实就是一个“盒子”<br>有Just类型、Future类型等，里面可以装东西，如数字“1”</p>
 <p>Just(1)，这就是一个类型为Just的盒子装着数字1，我们对其订阅，则会进行“拆盒子”的动作，拿到盒子里面的东西</p>
 <p><strong>以下代码均忽略sink返回的Cancellable</strong></p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Just</span>(<span class="number">1</span>).sink &#123; value <span class="keyword">in</span></span><br><span class="line">    <span class="built_in">print</span>(value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -139,7 +139,7 @@
 <li>使用tryCatch来转换成别的Publisher</li>
 <li>使用replaceError直接替换成别的值</li>
 </ol>
-<h3><span id="每记">每记</span></h3><p>在《每记》项目中，我们使用了SwiftUI + MVVM + Combine，配合三层架构使用（UI层，中间层以及数据层）</p>
+<h2><span id="每记">每记</span></h2><p>在《每记》项目中，我们使用了SwiftUI + MVVM + Combine，配合三层架构使用（UI层，中间层以及数据层）</p>
 <p>由于SwiftUI的特性，让View变得更加纯粹，而不像UIKit中的ViewController那样臃肿，SwiftUI配合MVVM十分顺手<br>底层数据层以基建库为主，如使用Combine对数据库、网络库封装，让其作为“Publisher”向顶层发送数据和结果</p>
 <p>自此我们自下而上地全方位使用Combine，将函数式编程完全融入到项目之中</p>
 
